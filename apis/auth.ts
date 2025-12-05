@@ -1,7 +1,7 @@
 import { BASE_URL } from "./constants";
 import { ApiError, AuthError, NetworkError } from "./error";
 
-export async function refreshAccessToken(): Promise<string> {
+export async function refreshAccessToken(): Promise<void> {
     let response: Response;
     try {
         response = await fetch(`${BASE_URL}/auth/refresh`, {
@@ -15,20 +15,11 @@ export async function refreshAccessToken(): Promise<string> {
         throw new NetworkError(error instanceof Error ? error.message : "Unknown network error");
     }
 
-    if (response.ok) {
-        const authHeader = response.headers.get("Authorization");
-        if (authHeader) {
-            return authHeader.replace("Bearer ", "");
-        } else {
-            throw new ApiError(response.status, "No Authorization header present");
-        }
-    }
-
-    else {
+    if (!response.ok) {
         const errorMessage = response.statusText;
 
         if (response.status === 401 || response.status === 403) {
-            throw new AuthError(errorMessage);
+            throw new AuthError(errorMessage, response.status);
         } else {
             throw new ApiError(response.status, errorMessage);
         }

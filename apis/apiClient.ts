@@ -1,5 +1,3 @@
-import { getDefaultStore } from 'jotai';
-import { accessTokenAtom } from '@/atoms/auth';
 import { BASE_URL } from './constants';
 import { refreshAccessToken } from './auth';
 import { ApiError, AuthError, ErrorResponse, NetworkError } from './error';
@@ -9,28 +7,22 @@ type RequestConfig = RequestInit & {
 };
 
 let isRefreshing = false;
-let refreshSubscribers: ((token: string | null) => void)[] = [];
+let refreshSubscribers: ((success: boolean) => void)[] = [];
 
-const onRefreshed = (token: string | null) => {
-    refreshSubscribers.forEach((callback) => callback(token));
+const onRefreshed = (success: boolean) => {
+    refreshSubscribers.forEach((callback) => callback(success));
     refreshSubscribers = [];
 };
 
-const addRefreshSubscriber = (callback: (token: string | null) => void) => {
+const addRefreshSubscriber = (callback: (success: boolean) => void) => {
     refreshSubscribers.push(callback);
 };
 
 async function fetchClient(endpoint: string, config: RequestConfig = {}) {
-    const store = getDefaultStore();
-    let token = store.get(accessTokenAtom);
-
     const headers: Record<string, string> = { ...config.headers };
 
     if (config.body !== undefined && !(config.body instanceof FormData)) {
         headers["Content-Type"] = "application/json";
-    }
-    if (token) {
-        headers["Authorization"] = `Bearer ${token}`;
     }
 
     const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
@@ -38,7 +30,8 @@ async function fetchClient(endpoint: string, config: RequestConfig = {}) {
 
     let response: Response;
     try {
-        response = await fetch(url, { ...config, headers });
+        // credentials: 'include' is crucial for sending cookies
+        response = await fetch(url, { ...config, headers, credentials: 'include' });
     } catch (error) {
         throw new NetworkError(error instanceof Error ? error.message : "Unknown network error");
     }
@@ -47,16 +40,14 @@ async function fetchClient(endpoint: string, config: RequestConfig = {}) {
         if (!isRefreshing) {
             isRefreshing = true;
             try {
-                const newToken = await refreshAccessToken();
-                store.set(accessTokenAtom, newToken);
-                onRefreshed(newToken);
+                await refreshAccessToken();
+                onRefreshed(true);
 
-                headers["Authorization"] = `Bearer ${newToken}`;
-                const retryResponse = await fetch(url, { ...config, headers });
+                // Retry original request (cookies are automatically attached)
+                const retryResponse = await fetch(url, { ...config, headers, credentials: 'include' });
                 return handleResponse(retryResponse);
             } catch (error) {
-                store.set(accessTokenAtom, null);
-                onRefreshed(null);
+                onRefreshed(false);
                 throw error;
             } finally {
                 isRefreshing = false;
@@ -64,14 +55,13 @@ async function fetchClient(endpoint: string, config: RequestConfig = {}) {
         } else {
 
             return new Promise<Response>((resolve, reject) => {
-                addRefreshSubscriber(async (newToken) => {
-                    if (!newToken) {
+                addRefreshSubscriber(async (success) => {
+                    if (!success) {
                         reject(new AuthError("Token refresh failed", 401));
                         return;
                     }
                     try {
-                        headers["Authorization"] = `Bearer ${newToken}`;
-                        const retryResponse = await fetch(url, { ...config, headers });
+                        const retryResponse = await fetch(url, { ...config, headers, credentials: 'include' });
                         const result = await handleResponse(retryResponse);
                         resolve(result);
                     } catch (error) {
