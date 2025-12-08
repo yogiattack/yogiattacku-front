@@ -6,11 +6,16 @@ export async function middleware(request: NextRequest) {
     const refreshToken = request.cookies.get('REFRESH_TOKEN')?.value;
 
 
-    const publicPaths = ['/',];
+    const publicPaths = ['/login'];
     const isPublicPath = publicPaths.includes(request.nextUrl.pathname) || request.nextUrl.pathname.startsWith('/auth/');
 
     // 1. 토큰 없고 공개 경로 아님 -> 로그인 페이지로
     if (!accessToken && !refreshToken && !isPublicPath) {
+        return NextResponse.redirect(new URL('/login', request.url));
+    }
+
+    // 2. 토큰 있고 로그인 페이지 접근 -> 메인 페이지로
+    if ((accessToken || refreshToken) && request.nextUrl.pathname === '/login') {
         return NextResponse.redirect(new URL('/', request.url));
     }
 
@@ -79,7 +84,7 @@ export async function middleware(request: NextRequest) {
             console.error("Middleware refresh error:", error);
 
             // 실패 시 로그아웃 처리
-            const response = NextResponse.redirect(new URL('/', request.url));
+            const response = NextResponse.redirect(new URL('/login', request.url));
             response.cookies.delete('ACCESS_TOKEN');
             response.cookies.delete('REFRESH_TOKEN');
             return response;
