@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export async function middleware(request: NextRequest) {
+    // 디버깅용 로그: 어떤 경로가 미들웨어를 타고 있는지 확인
+    console.log("Middleware called for:", request.nextUrl.pathname);
+
     const accessToken = request.cookies.get('ACCESS_TOKEN')?.value
     const refreshToken = request.cookies.get('REFRESH_TOKEN')?.value;
 
@@ -15,12 +18,14 @@ export async function middleware(request: NextRequest) {
     }
 
     // 2. 토큰 있고 로그인 페이지 접근 -> 메인 페이지로
-    if ((accessToken || refreshToken) && request.nextUrl.pathname === '/login') {
+    // 단, session 파라미터가 있는 경우(예: 만료되어 리다이렉트된 경우)는 제외하고 로그인 페이지 보여줌
+    if ((accessToken || refreshToken) && request.nextUrl.pathname === '/login' && !request.nextUrl.searchParams.get('session')) {
         return NextResponse.redirect(new URL('/', request.url));
     }
 
     // 2. 엑세스 토큰 만료 & 리프레시 토큰 존재 -> 갱신 시도
-    if (!accessToken && refreshToken) {
+    // 단, 이미 갱신 실패로 리다이렉트된 경우(session=expired)는 제외
+    if (!accessToken && refreshToken && !request.nextUrl.searchParams.get('session')) {
         try {
             const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -34,6 +39,7 @@ export async function middleware(request: NextRequest) {
             });
 
             if (!refreshResponse.ok) {
+                console.log(`Middleware: Refresh failed. Status: ${refreshResponse.status}, Text: ${refreshResponse.statusText}`);
                 throw new Error('Refresh failed');
             }
 
@@ -85,7 +91,7 @@ export async function middleware(request: NextRequest) {
             console.error("Middleware refresh error:", error);
 
             // 실패 시 로그아웃 처리
-            const response = NextResponse.redirect(new URL('/login', request.url));
+            const response = NextResponse.redirect(new URL('/login?session=expired', request.url));
             response.cookies.delete('ACCESS_TOKEN');
             response.cookies.delete('REFRESH_TOKEN');
             return response;
