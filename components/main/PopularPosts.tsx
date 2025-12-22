@@ -1,19 +1,20 @@
-import { Post } from "@/types/board";
+"use client";
+
 import { PostCard } from "@/components/board/PostCard";
-import { fetchServer } from "@/apis/utils/server-api";
 import Link from "next/link";
+import { getPopularPosts } from "@/apis/board";
+import { useQuery } from "@tanstack/react-query";
+import { boardKeys } from "@/apis/utils/queryKeys";
+import { queryOptions } from "@/apis/utils/queryOptions";
 
-async function getPopularPosts(): Promise<Post[]> {
-    try {
-        return await fetchServer("/api/posts/popular");
-    } catch (error) {
-        console.error("Failed to fetch popular posts:", error);
-        return [];
-    }
-}
+export function PopularPosts() {
+    const { data: posts } = useQuery({
+        queryKey: boardKeys.popular(),
+        queryFn: getPopularPosts,
+        ...queryOptions.popular,
+    });
 
-export async function PopularPosts() {
-    const posts = await getPopularPosts();
+    if (!posts) return null;
 
     return (
         <section className="w-full py-12 md:py-16 lg:py-20">
