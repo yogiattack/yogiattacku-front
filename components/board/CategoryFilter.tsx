@@ -10,44 +10,44 @@ export function CategoryFilter() {
     const router = useRouter();
     const searchParams = useSearchParams();
 
-    const currentCategories = searchParams.get("categories")?.split(",").filter(Boolean) || [];
+    const currentCategoryIds = searchParams.get("categoryIds")?.split(",").map(Number).filter(Boolean) || [];
 
-    const handleCategoryClick = useCallback((category: string) => {
+    const handleCategoryClick = useCallback((categoryId: number) => {
         const newSearchParams = new URLSearchParams(searchParams.toString());
 
-        let newCategories = [...currentCategories];
-        if (newCategories.includes(category)) {
-            newCategories = newCategories.filter(c => c !== category);
+        let newCategoryIds = [...currentCategoryIds];
+        if (newCategoryIds.includes(categoryId)) {
+            newCategoryIds = newCategoryIds.filter(id => id !== categoryId);
         } else {
-            newCategories.push(category);
+            newCategoryIds.push(categoryId);
         }
 
-        if (newCategories.length > 0) {
-            newSearchParams.set("categories", newCategories.join(","));
+        if (newCategoryIds.length > 0) {
+            newSearchParams.set("categoryIds", newCategoryIds.join(","));
         } else {
-            newSearchParams.delete("categories");
+            newSearchParams.delete("categoryIds");
         }
 
-        newSearchParams.set("page", "0");
+        newSearchParams.set("page", "1"); // Reset to page 1
 
         router.push(`?${newSearchParams.toString()}`);
-    }, [currentCategories, router, searchParams]);
+    }, [currentCategoryIds, router, searchParams]);
 
     return (
         <div className="flex flex-wrap gap-2 mb-8">
             {BOARD_CATEGORIES.map((category) => (
                 <Button
-                    key={category}
+                    key={category.id}
                     variant="outline"
-                    onClick={() => handleCategoryClick(category)}
+                    onClick={() => handleCategoryClick(category.id)}
                     className={cn(
                         "rounded-full transition-all",
-                        currentCategories.includes(category)
+                        currentCategoryIds.includes(category.id)
                             ? "bg-blue-500 text-white hover:bg-blue-600 border-blue-500"
                             : "hover:bg-gray-100"
                     )}
                 >
-                    {category}
+                    {category.name}
                 </Button>
             ))}
         </div>
