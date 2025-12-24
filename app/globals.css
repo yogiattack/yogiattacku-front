@@ -78,6 +78,49 @@
   --sidebar-ring: oklch(0.708 0 0);
 }
 
+/* Explicit overrides for MDXEditor typography */
+.prose h1 {
+  font-size: 2.25rem !important;
+  /* text-4xl */
+  font-weight: 700 !important;
+  margin-top: 0 !important;
+  margin-bottom: 0.8888889em !important;
+  line-height: 1.1111111 !important;
+}
+
+.prose h2 {
+  font-size: 1.875rem !important;
+  /* text-3xl */
+  font-weight: 700 !important;
+  margin-top: 2em !important;
+  margin-bottom: 1em !important;
+  line-height: 1.3333333 !important;
+}
+
+.prose h3 {
+  font-size: 1.5rem !important;
+  /* text-2xl */
+  font-weight: 600 !important;
+  margin-top: 1.6em !important;
+  margin-bottom: 0.6em !important;
+  line-height: 1.6 !important;
+}
+
+.prose p {
+  margin-top: 1.25em !important;
+  margin-bottom: 1.25em !important;
+}
+
+.prose ul {
+  list-style-type: disc !important;
+  padding-left: 1.625em !important;
+}
+
+.prose ol {
+  list-style-type: decimal !important;
+  padding-left: 1.625em !important;
+}
+
 .dark {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
@@ -116,6 +159,7 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }

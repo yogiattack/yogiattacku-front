@@ -19,7 +19,7 @@ export function Pagination({ currentPage, hasNext }: PaginationProps) {
         router.push(`?${newSearchParams.toString()}`);
     };
 
-    if (currentPage === 0 && !hasNext) return null;
+    if (currentPage === 1 && !hasNext) return null;
 
     return (
         <div className="flex justify-center items-center gap-2 mt-8">
@@ -27,14 +27,14 @@ export function Pagination({ currentPage, hasNext }: PaginationProps) {
                 variant="outline"
                 size="sm"
                 onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 0}
+                disabled={currentPage === 1}
             >
                 <ChevronLeft className="h-4 w-4 mr-1" />
                 이전
             </Button>
 
             <span className="text-sm font-medium mx-2">
-                {currentPage + 1}
+                {currentPage}
             </span>
 
             <Button

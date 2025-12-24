@@ -7,20 +7,20 @@ import { queryOptions } from "@/apis/utils/queryOptions";
 export default async function BoardPage({
     searchParams
 }: {
-    searchParams: Promise<{ page?: string; categories?: string }>
+    searchParams: Promise<{ page?: string; categoryIds?: string }>
 }) {
     const queryClient = new QueryClient();
     const params = await searchParams;
 
-    const page = parseInt(params.page || "0");
+    const page = parseInt(params.page || "1");
     const size = 9;
-    const categories = params.categories ? params.categories.split(",").filter(Boolean) : [];
+    const categoryIds = params.categoryIds ? params.categoryIds.split(",").filter(Boolean) : [];
 
     await queryClient.prefetchQuery({
-        queryKey: boardKeys.posts(page, size, categories),
+        queryKey: boardKeys.posts(page, size, categoryIds),
         queryFn: () => {
-            if (categories.length > 0) {
-                return getPostsByCategory(categories, page, size);
+            if (categoryIds.length > 0) {
+                return getPostsByCategory(categoryIds, page, size);
             }
             return getPosts(page, size);
         },
@@ -32,7 +32,7 @@ export default async function BoardPage({
             <BoardContainer
                 initialPage={page}
                 initialSize={size}
-                initialCategories={categories}
+                initialCategoryIds={categoryIds}
             />
         </HydrationBoundary>
     );
