@@ -14,6 +14,8 @@ const mockPosts: Post[] = Array.from({ length: POSTS_COUNT }).map((_, i) => ({
     viewCount: 100 + i * 5,
     bucketRootKey: `mock-bucket-${i}`,
     thumbnailS3Key: `images/mock/${i}.png`,
+    profileImageUrl: i % 2 === 0 ? `https://i.pravatar.cc/150?u=${i}` : null,
+    isAuthor: i % 3 === 0,
     categories: [
         { categoryId: (i % BOARD_CATEGORIES.length) + 1, name: BOARD_CATEGORIES[i % BOARD_CATEGORIES.length].name }
     ]
@@ -94,7 +96,9 @@ export const handlers = [
                     categoryId: 2,
                     name: "음식점"
                 }
-            ]
+            ],
+            profileImageUrl: "https://i.pravatar.cc/150?u=3",
+            isAuthor: true
         };
 
         return HttpResponse.json({
