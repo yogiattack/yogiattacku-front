@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -37,7 +38,15 @@ export function Header() {
             <div className="container mx-auto flex h-14 items-center justify-between">
                 <div className="flex items-center gap-2 cursor-pointer">
                     <Link href="/" className="flex items-center space-x-2">
-                        <span className="text-xl font-bold">🌏 여기어때유</span>
+                        <Image
+                            src="/logo_yogi.png"
+                            alt="여기어때유 로고"
+                            width={30}
+                            height={30}
+                            className="h-8 w-auto"
+                            priority
+                        />
+                        <span className="text-xl font-bold">여기어때유</span>
                     </Link>
                 </div>
 
@@ -47,7 +56,7 @@ export function Header() {
                             챗봇
                         </Button>
                     </Link>
-                    <Link href="/board">
+                    <Link href="/board?page=1&pageSize=9">
                         <Button variant="ghost" size="sm">
                             게시판
                         </Button>
