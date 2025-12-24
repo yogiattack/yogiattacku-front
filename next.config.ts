@@ -16,6 +16,18 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'http',
+        hostname: 'k.kakaocdn.net',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'k.kakaocdn.net',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
 
@@ -30,7 +42,7 @@ const nextConfig: NextConfig = {
       "style-src 'self' 'unsafe-inline';",
 
       // [Image]
-      "img-src 'self' data: https://t1.daumcdn.net https://*.daumcdn.net https://map.kakao.com https://*.amazonaws.com https://*.cloudfront.net;",
+      "img-src 'self' data: https://t1.daumcdn.net https://*.daumcdn.net https://map.kakao.com https://*.amazonaws.com https://*.cloudfront.net https://k.kakaocdn.net https://*.kakaocdn.net https://*.kakao.co.kr;",
 
       // [Font]
       "font-src 'self' data:;",
